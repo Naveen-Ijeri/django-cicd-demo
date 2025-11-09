@@ -1,10 +1,10 @@
-name: Django CI Pipeline
+name: Django CI
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -14,44 +14,42 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: cicd_demo
-          POSTGRES_USER: demo_user
-          POSTGRES_PASSWORD: demo_pass
+          POSTGRES_DB: django_db
+          POSTGRES_USER: django_user
+          POSTGRES_PASSWORD: django_pass
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U demo_user -d cicd_demo"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-cmd "pg_isready -U django_user -d django_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     env:
-      DEBUG: False
-      SECRET_KEY: dummy_secret_key
-      DB_NAME: cicd_demo
-      DB_USER: demo_user
-      DB_PASSWORD: demo_pass
+      DB_NAME: django_db
+      DB_USER: django_user
+      DB_PASSWORD: django_pass
       DB_HOST: localhost
       DB_PORT: 5432
+      SECRET_KEY: testsecretkey
+      DEBUG: True
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.9"
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run migrations
-        run: |
-          python manage.py migrate
+        run: python manage.py migrate
 
       - name: Run tests
-        run: |
-          python manage.py test
+        run: python manage.py test
