@@ -19,7 +19,7 @@ jobs:
 
       - name: Copy project files to EC2
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }}" ./ ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./ ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/
 
       - name: Run Docker on EC2
         run: |
