@@ -1,19 +1,18 @@
-# Use an official Python runtime as base image
-FROM python:3.10-slim
+# Base image
+FROM python:3.9-slim
 
-# Set working directory inside container
+# Set working directory
 WORKDIR /app
 
-# Prevents Python from writing .pyc files and buffering stdout
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
 # Install dependencies
-COPY requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
-COPY . /app/
+COPY . .
 
-# Run Django server
+# Expose port 8000
+EXPOSE 8000
+
+# Run Gunicorn
 CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]
