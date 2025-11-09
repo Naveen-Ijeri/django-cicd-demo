@@ -6,4 +6,5 @@ from rest_framework.decorators import api_view
 
 @api_view(['GET'])
 def hello_user(request):
+    print("ddddd")
     return Response({"message": "Welcome to Django CI/CD Demo!"})
