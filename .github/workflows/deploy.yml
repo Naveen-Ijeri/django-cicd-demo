@@ -1,4 +1,4 @@
-name: Deploy to Server
+name: Deploy to EC2
 
 on:
   push:
@@ -9,20 +9,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Connect to Server via SSH and Deploy
-        uses: appleboy/ssh-action@v0.1.10
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            cd /home/ubuntu/myapp
-            git pull origin main
-            docker-compose down
-            docker-compose build --no-cache
-            docker-compose up -d
-            docker system prune -f
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Copy project files to EC2
+        run: |
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }}" ./ ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/
+
+      - name: Run Docker on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          cd /home/ubuntu/app
+          docker compose down
+          docker compose up -d --build
+          docker ps
+          EOF
